@@ -5,17 +5,22 @@ const span = document.querySelector(".todo-count");
 form.addEventListener("submit", todoSubmit);
 list.addEventListener("click", manyTodos);
 
-const tasks = getLocalStorage();
-
 document.addEventListener("DOMContentLoaded", function () {
   let todos = getLocalStorage();
 
-  span.firstElementChild.textContent = tasks.length;
+  span.firstElementChild.textContent = todos.length;
 
   todos.forEach((todo) => {
-    addTodo(todo.title);
+    list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
+				<div class="view">
+					<input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
+					<label >${todo.title}</label>
+					<button class="destroy"></button>
+				</div>
+			</li>`;
   });
 });
+
 
 function todoSubmit(e) {
   e.preventDefault();
@@ -43,7 +48,7 @@ function todoSubmit(e) {
 function addTodo(input) {
   list.innerHTML += `<li>
 				<div class="view">
-					<input class="toggle" type="checkbox" />
+					<input class="toggle" type="checkbox"  />
 					<label>${input}</label>
 					<button class="destroy"></button>
 				</div>
@@ -67,11 +72,24 @@ function getLocalStorage() {
   return todos;
 }
 function manyTodos(e) {
+  let todos = getLocalStorage();
   if (e.target.className === "destroy") {
     e.target.parentElement.parentElement.remove();
     deleteLocalStorage(e.target.parentElement.parentElement.textContent);
   }
   if (e.target.className === "toggle") {
+    const newTodo = e.target.parentElement.textContent.trim();
+    
+    todos.forEach((todo) => {
+      if (todo.title === newTodo && todo.completed === false) {
+        todo.completed = true;
+        e.target.parentElement.parentElement.classList.add("completed")
+      } else if (todo.title === newTodo && todo.completed === true) {
+        todo.completed = false;
+        e.target.parentElement.parentElement.classList.remove("completed")
+      }
+    });
+    localStorage.setItem("todos", JSON.stringify(todos));
   }
 }
 function deleteLocalStorage(deleteTodo) {
