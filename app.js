@@ -1,14 +1,18 @@
 const form = document.getElementById("form-todo");
 const list = document.querySelector(".todo-list");
 const span = document.querySelector(".todo-count");
+const footer = document.querySelector(".footer");
 
 form.addEventListener("submit", todoSubmit);
 list.addEventListener("click", manyTodos);
+footer.addEventListener("click", filterTodos);
 
 document.addEventListener("DOMContentLoaded", function () {
   let todos = getLocalStorage();
 
-  span.firstElementChild.textContent = todos.length;
+  const falseTodos = todos.filter(({ completed }) => completed === false);
+
+  span.firstElementChild.textContent = falseTodos.length;
 
   todos.forEach((todo) => {
     list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
@@ -20,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			</li>`;
   });
 });
-
 
 function todoSubmit(e) {
   e.preventDefault();
@@ -79,14 +82,14 @@ function manyTodos(e) {
   }
   if (e.target.className === "toggle") {
     const newTodo = e.target.parentElement.textContent.trim();
-    
+
     todos.forEach((todo) => {
       if (todo.title === newTodo && todo.completed === false) {
         todo.completed = true;
-        e.target.parentElement.parentElement.classList.add("completed")
+        e.target.parentElement.parentElement.classList.add("completed");
       } else if (todo.title === newTodo && todo.completed === true) {
         todo.completed = false;
-        e.target.parentElement.parentElement.classList.remove("completed")
+        e.target.parentElement.parentElement.classList.remove("completed");
       }
     });
     localStorage.setItem("todos", JSON.stringify(todos));
@@ -98,4 +101,104 @@ function deleteLocalStorage(deleteTodo) {
   const newTodos = todos.filter((todo) => todo.title !== deleteTodo.trim());
 
   localStorage.setItem("todos", JSON.stringify(newTodos));
+}
+function filterTodos(e) {
+  let todos = getLocalStorage();
+  if (e.target.nodeName === "A") {
+    if (e.target.textContent === "Active") {
+      const newTodos = todos.filter(
+        ({ title, completed }) => completed === false
+      );
+
+      const lastTodos = newTodos
+        .map(({ title, completed }) => {
+          return `<li class="${completed ? "completed" : ""}">
+				<div class="view">
+					<input class="toggle" type="checkbox" type="checkbox" ${
+            completed ? "checked" : ""
+          } />
+					<label>${title}</label>
+					<button class="destroy"></button>
+				</div>
+			</li>`;
+        })
+        .join("");
+
+      list.innerHTML = lastTodos;
+
+      e.target.classList.add("selected");
+
+      e.target.parentElement.previousElementSibling.firstElementChild.classList.remove(
+        "selected"
+      );
+
+      e.target.parentElement.nextElementSibling.firstElementChild.classList.remove(
+        "selected"
+      );
+
+      const falseTodos = todos.filter(({ completed }) => completed === false);
+
+      span.firstElementChild.textContent = falseTodos.length;
+    } else if (e.target.textContent === "Completed") {
+      const completedTodos = todos.filter(
+        ({ title, completed }) => completed === true
+      );
+
+      const lastTodos = completedTodos
+        .map(({ title, completed }) => {
+          return `<li class="${completed ? "completed" : ""}">
+				<div class="view">
+					<input class="toggle" type="checkbox" type="checkbox" ${
+            completed ? "checked" : ""
+          } />
+					<label>${title}</label>
+					<button class="destroy"></button>
+				</div>
+			</li>`;
+        })
+        .join("");
+
+      list.innerHTML = lastTodos;
+
+      e.target.classList.add("selected");
+
+      e.target.parentElement.previousElementSibling.firstElementChild.classList.remove(
+        "selected"
+      );
+
+      e.target.parentElement.previousElementSibling.previousElementSibling.firstElementChild.classList.remove(
+        "selected"
+      );
+
+      const falseTodos = todos.filter(({ completed }) => completed === false);
+
+      span.firstElementChild.textContent = falseTodos.length;
+    } else {
+      const allTodos = todos
+        .map(({ title, completed }) => {
+          return `<li class="${completed ? "completed" : ""}">
+				<div class="view">
+					<input class="toggle" type="checkbox" ${completed ? "checked" : ""} />
+					<label>${title}</label>
+					<button class="destroy"></button>
+				</div>
+			</li>`;
+        })
+        .join("");
+      list.innerHTML = allTodos;
+
+      e.target.classList.add("selected");
+
+      e.target.parentElement.nextElementSibling.nextElementSibling.firstElementChild.classList.remove(
+        "selected"
+      );
+      e.target.parentElement.nextElementSibling.firstElementChild.classList.remove(
+        "selected"
+      );
+
+      const falseTodos = todos.filter(({ completed }) => completed === false);
+
+      span.firstElementChild.textContent = falseTodos.length;
+    }
+  }
 }
