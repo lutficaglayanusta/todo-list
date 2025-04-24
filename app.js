@@ -2,10 +2,12 @@ const form = document.getElementById("form-todo");
 const list = document.querySelector(".todo-list");
 const span = document.querySelector(".todo-count");
 const footer = document.querySelector(".footer");
+const clearButton = document.querySelector(".clear-completed");
 
 form.addEventListener("submit", todoSubmit);
 list.addEventListener("click", manyTodos);
 footer.addEventListener("click", filterTodos);
+clearButton.addEventListener("click",clearCompleted)
 
 document.addEventListener("DOMContentLoaded", function () {
   let todos = getLocalStorage();
@@ -201,4 +203,18 @@ function filterTodos(e) {
       span.firstElementChild.textContent = falseTodos.length;
     }
   }
+}
+function clearCompleted() {
+
+  const listFilter = document.querySelectorAll(".completed")
+  listFilter.forEach(item => {
+    item.remove()
+  })
+  let todos = getLocalStorage()
+  
+
+  const newTodos = todos.filter(({ completed }) => completed !== true)
+  localStorage.setItem("todos", JSON.stringify(newTodos))
+  
+
 }
