@@ -18,10 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   todos.forEach((todo) => {
     list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
-				<div class="view">
+				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
 					<label >${todo.title}</label>
+          <button class="edit-button"></button>
 					<button class="destroy"></button>
+          
 				</div>
 			</li>`;
   });
@@ -33,28 +35,44 @@ function todoSubmit(e) {
   const input = e.target.elements.todo.value;
 
   if (input === "") {
-    alert("Lütfen tüm alanları doldurunuz");
+    iziToast.error({
+      title: "Error",
+      message: "Please enter the all fields",
+      position: "topRight"
+    });
   } else {
     let todos = getLocalStorage();
 
     for (let i = 0; i < todos.length; i++) {
       if (todos[i].title === input) {
-        return alert("Bu görev zaten veritabanında var");
+        iziToast.error({
+          title: "Error",
+          message: "Bu görev zaten veritabanında var.",
+          position:"topRight"
+        })
+        e.target.elements.todo.value = ""
+        return;
       }
     }
 
     addTodo(input);
     addLocalStorage(input);
+    iziToast.success({
+      title: "Success",
+      message: "Mesaj başarılı bir şekilde eklendi.",
+      position:"topRight"
+    })
   }
 
-  e.target.reset();
+  form.reset();
 }
 
 function addTodo(input) {
   list.innerHTML += `<li>
-				<div class="view">
+				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox"  />
 					<label>${input}</label>
+          <button class="edit-button"></button>
 					<button class="destroy"></button>
 				</div>
 			</li>`;
@@ -62,7 +80,7 @@ function addTodo(input) {
 function addLocalStorage(input) {
   let todos = getLocalStorage();
 
-  todos.push({ title: input, completed: false });
+  todos.push({ title: input, priority:"low",completed: false });
 
   localStorage.setItem("todos", JSON.stringify(todos));
 }
@@ -83,7 +101,7 @@ function manyTodos(e) {
     deleteLocalStorage(e.target.parentElement.parentElement.textContent);
   }
   if (e.target.className === "toggle") {
-    const newTodo = e.target.parentElement.textContent.trim();
+    const newTodo = e.target.parentElement.parentElement.textContent.trim();
 
     todos.forEach((todo) => {
       if (todo.title === newTodo && todo.completed === false) {
@@ -96,8 +114,86 @@ function manyTodos(e) {
     });
     localStorage.setItem("todos", JSON.stringify(todos));
   }
+  if (e.target.className === "edit-button") {
+    console.log()
+    editTodoLocalStorage(e.target.previousElementSibling.textContent);
+  }
 }
+function editTodoLocalStorage(editTodo) {
+  let todos = getLocalStorage();
+  let instance;
+
+  todos.forEach(todo => {
+    if (todo.title === editTodo) {
+        instance = basicLightbox.create(`
+            <form id="edit-form">
+            <label id="task-name">Task Name</label>
+        <input type="text" name="task" for="task-name" value="${todo.title}">
+            <label id="priority">Priority</label>
+        <select name="select" class="choose" for="priority">
+          <option value="low" ${todo.priority === "low" ? "selected" : ""}>Low</option>
+          <option value="medium" ${todo.priority === "medium" ? "selected" : ""}>Medium</option>
+          <option value="high" ${todo.priority === "high" ? "selected" : ""}>High</option>
+        </select>
+        <div>
+          <button class="submit-button" type="submit">Submit</button>
+          <button class="cancel-button" type="button">Cancel</button>
+        </div>
+            </form>
+          `);
+    }
+  })
+
+  instance.show();
+
+  const editForm = document.getElementById("edit-form");
+
+  editForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const input = e.target.elements.task.value;
+    const select = e.target.elements.select.value;
+
+   
+    
+    todos = todos.map(todo => {
+      if (todo.title === editTodo) {
+        return { ...todo, title: input, priority: select };
+      }
+      return todo;
+    });
+    localStorage.setItem("todos", JSON.stringify(todos));
+
+    list.innerHTML = "";
+    todos.forEach((todo) => {
+      list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
+        <div style="display:flex;justify-content:space-between;align-items:center;" class="view">
+          <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
+          <label>${todo.title}</label>
+          <button class="edit-button"></button>
+          <button class="destroy"></button>
+        </div>
+      </li>`;
+    });
+
+    iziToast.success({
+      title: "Success",
+      message: "Başarılı bir şekilde güncellendi",
+      position:"topRight"
+    })
+
+    instance.close();
+  });
+
+  const cancelButton = document.querySelector(".cancel-button")
+  cancelButton.addEventListener("click", () => {
+    instance.close()
+  })
+}
+
+
 function deleteLocalStorage(deleteTodo) {
+  console.log(deleteTodo.trim())
   const todos = getLocalStorage();
 
   const newTodos = todos.filter((todo) => todo.title !== deleteTodo.trim());
@@ -115,11 +211,12 @@ function filterTodos(e) {
       const lastTodos = newTodos
         .map(({ title, completed }) => {
           return `<li class="${completed ? "completed" : ""}">
-				<div class="view">
+				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" type="checkbox" ${
             completed ? "checked" : ""
           } />
 					<label>${title}</label>
+          <button class="edit-button"></button>
 					<button class="destroy"></button>
 				</div>
 			</li>`;
@@ -149,11 +246,12 @@ function filterTodos(e) {
       const lastTodos = completedTodos
         .map(({ title, completed }) => {
           return `<li class="${completed ? "completed" : ""}">
-				<div class="view">
+				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" type="checkbox" ${
             completed ? "checked" : ""
           } />
 					<label>${title}</label>
+          <button class="edit-button"></button>
 					<button class="destroy"></button>
 				</div>
 			</li>`;
@@ -179,9 +277,10 @@ function filterTodos(e) {
       const allTodos = todos
         .map(({ title, completed }) => {
           return `<li class="${completed ? "completed" : ""}">
-				<div class="view">
+				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" ${completed ? "checked" : ""} />
 					<label>${title}</label>
+					<button class="edit-button"></button>
 					<button class="destroy"></button>
 				</div>
 			</li>`;
@@ -216,5 +315,10 @@ function clearCompleted() {
   const newTodos = todos.filter(({ completed }) => completed !== true)
   localStorage.setItem("todos", JSON.stringify(newTodos))
   
+  iziToast.success({
+    title: "Success",
+    message: "Tüm tamamlanmış görevler silindi",
+    position:"topRight"
+  })
 
 }

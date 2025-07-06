@@ -250,9 +250,6 @@ body {
     display: block;
 }
 
-.todo-list li .edit {
-    display: none;
-}
 
 .todo-list li.editing:last-child {
     margin-bottom: -1px;
@@ -424,4 +421,74 @@ meta,
 [property="todo"] .view:focus-within .toggle,
 [property="todo"] .view:focus-within button {
     display: none !important;
+}
+.todo-list li .edit-button {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 40px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    margin: auto 0;
+    font-size: 30px;
+    color: #cc9a9a;
+    margin-bottom: 11px;
+    transition: color 0.2s ease-out;
+}
+
+.todo-list li .edit-button:hover {
+    color: #af5b5e;
+}
+
+.todo-list li .edit-button:after {
+    content: '✓';
+}
+
+.todo-list li:hover .edit-button {
+    display: block;
+}
+
+
+#edit-form{
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 300px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+}
+#edit-form input{
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+#edit-form div{ 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#edit-form label{
+    font-size: 1.2rem;
+    margin: 20px 0px;
+}
+#edit-form .choose{
+    margin-bottom: 30px;
+}
+#edit-form .submit-button{
+    border: none;
+    background-color:red;
+    color: white;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+#edit-form .cancel-button{
+    border: none;
+    background-color: blue;
+    color: white;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
 }
