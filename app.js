@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const falseTodos = todos.filter(({ completed }) => completed === false);
 
   span.firstElementChild.textContent = falseTodos.length;
+  span.textContent = falseTodos.length > 1 ? `${falseTodos.length} items left` :`${falseTodos.length} item left`
 
   todos.forEach((todo) => {
     list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
@@ -37,8 +38,8 @@ function todoSubmit(e) {
   if (input === "") {
     iziToast.error({
       title: "Error",
-      message: "Please enter the all fields",
-      position: "topRight"
+      message: "Please fill in all fields",
+      position: "topRight",
     });
   } else {
     let todos = getLocalStorage();
@@ -47,9 +48,9 @@ function todoSubmit(e) {
       if (todos[i].title === input) {
         iziToast.error({
           title: "Error",
-          message: "Bu görev zaten veritabanında var.",
-          position:"topRight"
-        })
+          message: "This task already exists",
+          position: "topRight",
+        });
         e.target.elements.todo.value = ""
         return;
       }
@@ -59,18 +60,23 @@ function todoSubmit(e) {
     addLocalStorage(input);
     iziToast.success({
       title: "Success",
-      message: "Mesaj başarılı bir şekilde eklendi.",
-      position:"topRight"
-    })
+      message: "The message was successfully added.",
+      position: "topRight",
+    });
   }
 
   form.reset();
 }
 
 function addTodo(input) {
+  let todos = getLocalStorage()
+
+  todos.forEach(todo => { })
+  
+
   list.innerHTML += `<li>
 				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
-					<input class="toggle" type="checkbox"  />
+					<input class="toggle" type="checkbox" />
 					<label>${input}</label>
           <button class="edit-button"></button>
 					<button class="destroy"></button>
@@ -80,7 +86,11 @@ function addTodo(input) {
 function addLocalStorage(input) {
   let todos = getLocalStorage();
 
-  todos.push({ title: input, priority:"low",completed: false });
+  todos.push({ title: input, priority: "low", completed: false });
+
+  const newTodos = todos.filter(({completed})=> completed === false)
+  
+  span.textContent = newTodos.length > 1 ? `${newTodos.length} items left` : `${newTodos.length} item left`
 
   localStorage.setItem("todos", JSON.stringify(todos));
 }
@@ -99,6 +109,7 @@ function manyTodos(e) {
   if (e.target.className === "destroy") {
     e.target.parentElement.parentElement.remove();
     deleteLocalStorage(e.target.parentElement.parentElement.textContent);
+    
   }
   if (e.target.className === "toggle") {
     const newTodo = e.target.parentElement.parentElement.textContent.trim();
@@ -107,19 +118,25 @@ function manyTodos(e) {
       if (todo.title === newTodo && todo.completed === false) {
         todo.completed = true;
         e.target.parentElement.parentElement.classList.add("completed");
+        e.target.setAttribute("checked", true);
       } else if (todo.title === newTodo && todo.completed === true) {
         todo.completed = false;
+        e.target.setAttribute("checked", false);
         e.target.parentElement.parentElement.classList.remove("completed");
       }
     });
+    const newTodos = todos.filter(({ completed }) => completed === false)
+    
+    span.textContent = newTodos.length > 1 ? `${newTodos.length} items left` : `${newTodos.length} item left`
+
     localStorage.setItem("todos", JSON.stringify(todos));
   }
   if (e.target.className === "edit-button") {
-    console.log()
     editTodoLocalStorage(e.target.previousElementSibling.textContent);
   }
 }
-function editTodoLocalStorage(editTodo) {
+function editTodoLocalStorage(editTodo){
+
   let todos = getLocalStorage();
   let instance;
 
@@ -152,10 +169,10 @@ function editTodoLocalStorage(editTodo) {
     e.preventDefault();
 
     const input = e.target.elements.task.value;
-    const select = e.target.elements.select.value;
-
-   
+    const select = e.target.elements.select.value;    
     
+
+
     todos = todos.map(todo => {
       if (todo.title === editTodo) {
         return { ...todo, title: input, priority: select };
@@ -178,9 +195,9 @@ function editTodoLocalStorage(editTodo) {
 
     iziToast.success({
       title: "Success",
-      message: "Başarılı bir şekilde güncellendi",
-      position:"topRight"
-    })
+      message: "Successfully updated",
+      position: "topRight",
+    });
 
     instance.close();
   });
@@ -193,10 +210,13 @@ function editTodoLocalStorage(editTodo) {
 
 
 function deleteLocalStorage(deleteTodo) {
-  console.log(deleteTodo.trim())
   const todos = getLocalStorage();
 
   const newTodos = todos.filter((todo) => todo.title !== deleteTodo.trim());
+
+  const falseTodos = newTodos.filter(({completed})=> completed === false)
+
+  span.textContent = falseTodos.length > 1 ? `${falseTodos.length} items left` : `${falseTodos.length} item left`
 
   localStorage.setItem("todos", JSON.stringify(newTodos));
 }
@@ -204,8 +224,9 @@ function filterTodos(e) {
   let todos = getLocalStorage();
   if (e.target.nodeName === "A") {
     if (e.target.textContent === "Active") {
+
       const newTodos = todos.filter(
-        ({ title, completed }) => completed === false
+        ({ completed }) => completed === false
       );
 
       const lastTodos = newTodos
@@ -235,9 +256,10 @@ function filterTodos(e) {
         "selected"
       );
 
-      const falseTodos = todos.filter(({ completed }) => completed === false);
 
-      span.firstElementChild.textContent = falseTodos.length;
+      span.textContent = newTodos.length > 1 ? `${newTodos.length} items left` : `${newTodos.length} item left`
+
+
     } else if (e.target.textContent === "Completed") {
       const completedTodos = todos.filter(
         ({ title, completed }) => completed === true
@@ -272,7 +294,7 @@ function filterTodos(e) {
 
       const falseTodos = todos.filter(({ completed }) => completed === false);
 
-      span.firstElementChild.textContent = falseTodos.length;
+      span.textContent = falseTodos.length ? `${falseTodos.length} items left` : `${falseTodos.length} item left`
     } else {
       const allTodos = todos
         .map(({ title, completed }) => {
@@ -299,7 +321,7 @@ function filterTodos(e) {
 
       const falseTodos = todos.filter(({ completed }) => completed === false);
 
-      span.firstElementChild.textContent = falseTodos.length;
+      span.textContent = falseTodos.length ? `${falseTodos.length} items left` : `${falseTodos.length} item left` ;
     }
   }
 }
@@ -317,8 +339,8 @@ function clearCompleted() {
   
   iziToast.success({
     title: "Success",
-    message: "Tüm tamamlanmış görevler silindi",
-    position:"topRight"
-  })
+    message: "All completed tasks deleted",
+    position: "topRight",
+  });
 
 }
