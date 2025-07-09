@@ -15,10 +15,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const falseTodos = todos.filter(({ completed }) => completed === false);
 
   span.firstElementChild.textContent = falseTodos.length;
-  span.textContent = falseTodos.length > 1 ? `${falseTodos.length} items left` :`${falseTodos.length} item left`
+  span.textContent = falseTodos.length > 1 ? `${falseTodos.length} items left` : `${falseTodos.length} item left`
+
+  let color;
+  
 
   todos.forEach((todo) => {
-    list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
+    if (todo.priority === "low") {
+      color = "low";
+    } else if (todo.priority === "medium") {
+      color = "medium";
+    } else {
+      color = "high";
+    }
+    list.innerHTML += `<li class="${todo.completed ? "completed" : ""} ${color}">
 				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
 					<label >${todo.title}</label>
@@ -70,11 +80,9 @@ function todoSubmit(e) {
 
 function addTodo(input) {
   let todos = getLocalStorage()
-
-  todos.forEach(todo => { })
   
 
-  list.innerHTML += `<li>
+  list.innerHTML += `<li class="low">
 				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" />
 					<label>${input}</label>
@@ -117,12 +125,12 @@ function manyTodos(e) {
     todos.forEach((todo) => {
       if (todo.title === newTodo && todo.completed === false) {
         todo.completed = true;
-        e.target.parentElement.parentElement.classList.add("completed");
+        e.target.parentElement.parentElement.classList.toggle("completed");
         e.target.setAttribute("checked", true);
       } else if (todo.title === newTodo && todo.completed === true) {
         todo.completed = false;
-        e.target.setAttribute("checked", false);
-        e.target.parentElement.parentElement.classList.remove("completed");
+        e.target.removeAttribute("checked");
+        e.target.parentElement.parentElement.classList.toggle("completed");
       }
     });
     const newTodos = todos.filter(({ completed }) => completed === false)
@@ -183,7 +191,14 @@ function editTodoLocalStorage(editTodo){
 
     list.innerHTML = "";
     todos.forEach((todo) => {
-      list.innerHTML += `<li class="${todo.completed ? "completed" : ""}">
+      if (todo.priority === "low") {
+        color = "low";
+      } else if (todo.priority === "medium") {
+        color = "medium";
+      } else {
+        color = "high";
+      }
+      list.innerHTML += `<li class="${todo.completed ? "completed" : ""} ${color}">
         <div style="display:flex;justify-content:space-between;align-items:center;" class="view">
           <input class="toggle" type="checkbox" ${todo.completed ? "checked" : ""} />
           <label>${todo.title}</label>
@@ -230,8 +245,15 @@ function filterTodos(e) {
       );
 
       const lastTodos = newTodos
-        .map(({ title, completed }) => {
-          return `<li class="${completed ? "completed" : ""}">
+        .map(({ title,priority, completed }) => {
+          if (priority === "low") {
+            color = "low";
+          } else if (priority === "medium") {
+            color = "medium";
+          } else {
+            color = "high";
+          }
+          return `<li class="${completed ? "completed" : ""} ${color}">
 				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" type="checkbox" ${
             completed ? "checked" : ""
@@ -266,8 +288,15 @@ function filterTodos(e) {
       );
 
       const lastTodos = completedTodos
-        .map(({ title, completed }) => {
-          return `<li class="${completed ? "completed" : ""}">
+        .map(({ title,priority,completed }) => {
+          if (priority === "low") {
+            color = "low";
+          } else if (priority === "medium") {
+            color = "medium";
+          } else {
+            color = "high";
+          }
+          return `<li class="${completed ? "completed" : ""} ${color}">
 				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" type="checkbox" ${
             completed ? "checked" : ""
@@ -297,8 +326,15 @@ function filterTodos(e) {
       span.textContent = falseTodos.length ? `${falseTodos.length} items left` : `${falseTodos.length} item left`
     } else {
       const allTodos = todos
-        .map(({ title, completed }) => {
-          return `<li class="${completed ? "completed" : ""}">
+        .map(({ title,priority,completed }) => {
+          if (priority === "low") {
+            color = "low";
+          } else if (priority === "medium") {
+            color = "medium";
+          } else {
+            color = "high";
+          }
+          return `<li class="${completed ? "completed" : ""} ${color}">
 				<div style="display:flex;justify-content:space-between;align-items:center;" class="view">
 					<input class="toggle" type="checkbox" ${completed ? "checked" : ""} />
 					<label>${title}</label>

@@ -492,3 +492,12 @@ meta,
     padding: 10px 20px;
     cursor: pointer;
 }
+.low{
+    border: 2px solid green;
+}
+.medium{
+    border: 2px solid blue;
+}
+.high{
+    border: 2px solid red;
+}
